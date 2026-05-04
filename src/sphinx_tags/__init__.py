@@ -377,7 +377,7 @@ def tagpage(tags, outdir, title, extension, tags_index_head):
 def tag_single_page(tags, pages, outdir, title, extension, tags_index_head):
     """Creates Tag overview page.
 
-    This page contains a list of all available tags.
+    This page contains headings of all available tags, with a list of pages under each heading.
 
     """
 

@@ -365,6 +365,58 @@ def tagpage(tags, outdir, title, extension, tags_index_head):
     with open(filename, "w", encoding="utf8") as f:
         f.write("\n".join(content))
 
+def tag_single_page(tags, pages, outdir, title, extension, tags_index_head):
+    """Creates Tag overview page.
+
+    This page contains a list of all available tags.
+
+    """
+
+    tags = list(tags.values())
+
+    if "md" in extension:
+        content = []
+        content.append("---")
+        content.append("orphan: true")
+        content.append("---")
+        content.append("")
+        content.append("(tagoverview)=")
+        content.append("")
+        content.append(f"# {title}")
+        content.append("")
+        # Subheadings and links for each tag
+        for tag in sorted(tags, key=lambda t: t.name):
+            content.append(f"## {tag.name} ({len(tag.items)})")
+            for items in pages:
+                if tag.name in items.tags:
+                    content.append(f"- [{items.filepath.stem}]({items.relpath(outdir)})")
+            content.append("")
+        content.append("```")
+        content.append("")
+        filename = os.path.join(outdir, "tagsindex.md")
+    else:
+        content = []
+        content.append(":orphan:")
+        content.append("")
+        content.append(".. _tagoverview:")
+        content.append("")
+        content.append(title)
+        content.append("#" * textwidth(title))
+        content.append("")
+        # Subheadings and links for each tag
+        for tag in sorted(tags, key=lambda t: t.name):
+            content.append(
+                f"{tag.name} ({len(tag.items)})"
+            )
+            content.append("-" * textwidth(content[-1]))
+            for items in pages:
+                if tag.name in items.tags:
+                    content.append(f"- `{items.filepath.stem} <{items.relpath(outdir)}>`_")
+        content.append("")
+        filename = os.path.join(outdir, "tagsindex.rst")
+
+    with open(filename, "w", encoding="utf8") as f:
+        f.write("\n".join(content))
 
 def assign_entries(app):
     """Assign all found entries to their tag."""
@@ -398,28 +450,48 @@ def update_tags(app):
             if file.endswith("md") or file.endswith("rst"):
                 os.remove(os.path.join(app.srcdir, tags_output_dir, file))
 
+
+        if not app.config.tags_single_page:
         # Create pages for each tag
-        tags, pages = assign_entries(app)
+            tags, pages = assign_entries(app)
 
-        for tag in tags.values():
-            tag.create_file(
-                [item for item in pages if tag.name in item.tags],
+            for tag in tags.values():
+                tag.create_file(
+                    [item for item in pages if tag.name in item.tags],
+                    app.config.tags_extension,
+                    tags_output_dir,
+                    app.srcdir,
+                    app.config.tags_page_title,
+                    app.config.tags_page_header,
+                )
+
+            # Create tags overview page
+            tagpage(
+                tags,
+                os.path.join(app.srcdir, tags_output_dir),
+                app.config.tags_overview_title,
                 app.config.tags_extension,
-                tags_output_dir,
-                app.srcdir,
-                app.config.tags_page_title,
-                app.config.tags_page_header,
+                app.config.tags_index_head,
             )
+            logger.info("Tags updated", color="white")
 
-        # Create tags overview page
-        tagpage(
-            tags,
-            os.path.join(app.srcdir, tags_output_dir),
-            app.config.tags_overview_title,
-            app.config.tags_extension,
-            app.config.tags_index_head,
-        )
-        logger.info("Tags updated", color="white")
+        else:
+
+        # Create a page with all tags
+            tags, pages = assign_entries(app)
+
+        #TODO: Rework to create a single page 
+
+            tag_single_page(
+                tags,
+                pages,
+                os.path.join(app.srcdir, tags_output_dir),
+                app.config.tags_overview_title,
+                app.config.tags_extension,
+                app.config.tags_index_head,
+            )
+            logger.info("Tags updated", color="white")
+
     else:
         logger.info(
             "Tags were not created (tags_create_tags=False in conf.py)", color="white"
@@ -442,6 +514,7 @@ def setup(app):
     app.add_config_value("tags_index_head", "Tags", "html")
     app.add_config_value("tags_create_badges", False, "html")
     app.add_config_value("tags_badge_colors", {}, "html")
+    app.add_config_value("tags_single_page", False, "html")
 
     # internal config values
     app.add_config_value(

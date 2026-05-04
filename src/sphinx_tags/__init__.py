@@ -113,9 +113,13 @@ class TagLinks(SphinxDirective):
 
     def _get_plaintext_node(self, tag: str, file_basename: str) -> List[nodes.Node]:
         """Get a plaintext reference link for the given tag"""
-        link = Path(self.env.app.config.tags_output_dir) / f"{file_basename}/"
-        print(f"Link for tag '{tag}': {link}")
-        return nodes.reference(refuri="/" + str(link), text=tag)
+        tags_output_dir = self.env.app.config.tags_output_dir
+        if self.env.app.config.tags_single_page:
+            ref_label = f"sphx_tag_{file_basename}"
+            link = f"/{tags_output_dir}/tagsindex#{ref_label}"
+        else:
+            link = "/" + str(Path(tags_output_dir) / f"{file_basename}/")
+        return nodes.reference(refuri=link, text=tag)
 
     def _get_badge_node(
         self, tag: str, file_basename: str, relative_tag_dir: Path
@@ -128,7 +132,11 @@ class TagLinks(SphinxDirective):
         text_nodes, messages = self.state.inline_text("", self.lineno)
 
         # Ref paths always use forward slashes, even on Windows
-        tag_ref = f"{tag} <{relative_tag_dir.as_posix()}/{file_basename}>"
+        if self.env.app.config.tags_single_page:
+            ref_label = f"sphx_tag_{file_basename}"
+            tag_ref = f"{tag} <{ref_label}>"
+        else:
+            tag_ref = f"{tag} <{relative_tag_dir.as_posix()}/{file_basename}>"
         tag_color = self._get_tag_color(tag)
         tag_badge = XRefBadgeRole(tag_color)
         return tag_badge(
@@ -387,6 +395,8 @@ def tag_single_page(tags, pages, outdir, title, extension, tags_index_head):
         content.append("")
         # Subheadings and links for each tag
         for tag in sorted(tags, key=lambda t: t.name):
+            ref_label = f"sphx_tag_{tag.file_basename}"
+            content.append(f"({ref_label})=")
             content.append(f"## {tag.name} ({len(tag.items)})")
             for items in pages:
                 if tag.name in items.tags:
@@ -406,6 +416,9 @@ def tag_single_page(tags, pages, outdir, title, extension, tags_index_head):
         content.append("")
         # Subheadings and links for each tag
         for tag in sorted(tags, key=lambda t: t.name):
+            ref_label = f"sphx_tag_{tag.file_basename}"
+            content.append(f".. _{ref_label}:")
+            content.append("")
             content.append(
                 f"{tag.name} ({len(tag.items)})"
             )

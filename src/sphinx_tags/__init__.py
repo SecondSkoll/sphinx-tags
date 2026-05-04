@@ -113,7 +113,10 @@ class TagLinks(SphinxDirective):
 
     def _get_plaintext_node(self, tag: str, file_basename: str) -> List[nodes.Node]:
         """Get a plaintext reference link for the given tag"""
-        link = Path(self.env.app.config.tags_output_dir) / f"{file_basename}/"
+        if self.env.app.config.tags_single_page:
+            link = Path(self.env.app.config.tags_output_dir) / "tagsindex"
+        else:
+            link = Path(self.env.app.config.tags_output_dir) / f"{file_basename}/"
         return nodes.reference(refuri="/" + str(link), text=tag)
 
     def _get_badge_node(

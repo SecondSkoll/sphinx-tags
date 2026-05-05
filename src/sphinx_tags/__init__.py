@@ -397,7 +397,7 @@ def tag_single_page(tags, pages, outdir, title, extension, tags_index_head):
         for tag in sorted(tags, key=lambda t: t.name):
             ref_label = f"sphx_tag_{tag.file_basename}"
             content.append(f"({ref_label})=")
-            content.append(f"## {tag.name} ({len(tag.items)})")
+            content.append(f"## {tag.name}")
             for items in pages:
                 if tag.name in items.tags:
                     content.append(f"- [{items.filepath.stem}]({items.relpath(outdir)})")
@@ -418,7 +418,7 @@ def tag_single_page(tags, pages, outdir, title, extension, tags_index_head):
             content.append(f".. _{ref_label}:")
             content.append("")
             content.append(
-                f"{tag.name} ({len(tag.items)})"
+                f"{tag.name}"
             )
             content.append("-" * textwidth(content[-1]))
             for items in pages:

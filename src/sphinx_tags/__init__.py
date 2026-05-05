@@ -402,8 +402,6 @@ def tag_single_page(tags, pages, outdir, title, extension, tags_index_head):
                 if tag.name in items.tags:
                     content.append(f"- [{items.filepath.stem}]({items.relpath(outdir)})")
             content.append("")
-        content.append("```")
-        content.append("")
         filename = os.path.join(outdir, "tagsindex.md")
     else:
         content = []

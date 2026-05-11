@@ -20,7 +20,9 @@ SINGLE_PAGE_OUTPUT_DIR = OUTPUT_ROOT_DIR / "general_single_page"
 def assert_output_matches(build_dir: Path, expected_dir: Path, relative_path: Path):
     contents = build_dir / relative_path
     expected_contents = expected_dir / relative_path
-    assert contents.read_text().splitlines() == expected_contents.read_text().splitlines()
+    assert (
+        contents.read_text().splitlines() == expected_contents.read_text().splitlines()
+    )
 
 
 def run_all_formats():
@@ -92,7 +94,9 @@ def test_single_page_index(app: SphinxTestApp):
     app.build(force_all=True)
     build_dir = Path(app.srcdir) / "_build" / "text"
 
-    assert_output_matches(build_dir, SINGLE_PAGE_OUTPUT_DIR, Path("_tags") / "tagsindex.txt")
+    assert_output_matches(
+        build_dir, SINGLE_PAGE_OUTPUT_DIR, Path("_tags") / "tagsindex.txt"
+    )
     assert_output_matches(build_dir, SINGLE_PAGE_OUTPUT_DIR, Path("index.txt"))
 
 

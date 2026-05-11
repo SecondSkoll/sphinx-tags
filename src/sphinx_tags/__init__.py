@@ -374,6 +374,7 @@ def tagpage(tags, outdir, title, extension, tags_index_head):
     with open(filename, "w", encoding="utf8") as f:
         f.write("\n".join(content))
 
+
 def tag_single_page(tags, pages, outdir, title, extension, tags_index_head):
     """Creates Tag overview page.
 
@@ -400,7 +401,9 @@ def tag_single_page(tags, pages, outdir, title, extension, tags_index_head):
             content.append(f"## {tag.name}")
             for items in pages:
                 if tag.name in items.tags:
-                    content.append(f"- [{items.filepath.stem}]({items.relpath(outdir)})")
+                    content.append(
+                        f"- [{items.filepath.stem}]({items.relpath(outdir)})"
+                    )
             content.append("")
         filename = os.path.join(outdir, "tagsindex.md")
     else:
@@ -417,18 +420,19 @@ def tag_single_page(tags, pages, outdir, title, extension, tags_index_head):
             ref_label = f"sphx_tag_{tag.file_basename}"
             content.append(f".. _{ref_label}:")
             content.append("")
-            content.append(
-                f"{tag.name}"
-            )
+            content.append(f"{tag.name}")
             content.append("-" * textwidth(content[-1]))
             for items in pages:
                 if tag.name in items.tags:
-                    content.append(f"- `{items.filepath.stem} <{items.relpath(outdir)}>`_")
+                    content.append(
+                        f"- `{items.filepath.stem} <{items.relpath(outdir)}>`_"
+                    )
         content.append("")
         filename = os.path.join(outdir, "tagsindex.rst")
 
     with open(filename, "w", encoding="utf8") as f:
         f.write("\n".join(content))
+
 
 def assign_entries(app):
     """Assign all found entries to their tag."""
@@ -462,9 +466,8 @@ def update_tags(app):
             if file.endswith("md") or file.endswith("rst"):
                 os.remove(os.path.join(app.srcdir, tags_output_dir, file))
 
-
         if not app.config.tags_single_page:
-        # Create pages for each tag
+            # Create pages for each tag
             tags, pages = assign_entries(app)
 
             for tag in tags.values():
@@ -489,10 +492,10 @@ def update_tags(app):
 
         else:
 
-        # Create a page with all tags
+            # Create a page with all tags
             tags, pages = assign_entries(app)
 
-        #TODO: Rework to create a single page 
+            # TODO: Rework to create a single page
 
             tag_single_page(
                 tags,
